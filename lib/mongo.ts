@@ -34,13 +34,20 @@ export type Analysis = InferSchemaType<typeof analysisSchema>;
 // Memoised on globalThis so HMR reloads reuse one connection and one model.
 const g = globalThis as typeof globalThis & { _mongoose?: Promise<Model<Analysis>> };
 
+async function connect(): Promise<Model<Analysis>> {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) throw new Error("MONGODB_URI is not set");
+  // dbName wins over whatever path the URI carries.
+  await mongoose.connect(uri, { dbName: DB_NAME });
+  return (mongoose.models.Analysis ??
+    mongoose.model("Analysis", analysisSchema)) as Model<Analysis>;
+}
+
 export function analyses(): Promise<Model<Analysis>> {
-  return (g._mongoose ??= (async () => {
-    const uri = process.env.MONGODB_URI;
-    if (!uri) throw new Error("MONGODB_URI is not set");
-    // dbName wins over whatever path the URI carries.
-    await mongoose.connect(uri, { dbName: DB_NAME });
-    return (mongoose.models.Analysis ??
-      mongoose.model("Analysis", analysisSchema)) as Model<Analysis>;
-  })());
+  return (g._mongoose ??= connect().catch((e) => {
+    // Never cache a failed connection, or a Mongo blip at startup would poison
+    // every later request.
+    g._mongoose = undefined;
+    throw e;
+  }));
 }
