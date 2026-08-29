@@ -26,7 +26,7 @@ export default function Page() {
           <Label htmlFor="url">YouTube URL</Label>
           <Input id="url" name="url" required placeholder="https://youtu.be/…" />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
           <div className="grid gap-2">
             <Label htmlFor="start">Start</Label>
             <Input
@@ -38,6 +38,22 @@ export default function Page() {
             />
           </div>
           <div className="grid gap-2">
+            <span className="text-sm leading-none font-medium select-none">Length</span>
+            <div role="group" aria-label="Clip length" className="flex gap-1">
+              {QUICK_LENGTHS.map((d) => (
+                <Button
+                  key={d}
+                  type="button"
+                  variant="outline"
+                  disabled={startSec === null}
+                  onClick={() => setEnd(formatTimestamp(startSec! + d))}
+                >
+                  +{d}s
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div className="grid gap-2">
             <Label htmlFor="end">End</Label>
             <Input
               id="end"
@@ -47,20 +63,6 @@ export default function Page() {
               onChange={(e) => setEnd(e.target.value)}
             />
           </div>
-        </div>
-        <div className="flex gap-2">
-          {QUICK_LENGTHS.map((d) => (
-            <Button
-              key={d}
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={startSec === null}
-              onClick={() => setEnd(formatTimestamp(startSec! + d))}
-            >
-              +{d}s
-            </Button>
-          ))}
         </div>
         <Button type="submit" disabled={isPending} className="w-full">
           {isPending ? "Analyzing…" : "Analyze"}
