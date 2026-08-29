@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AITextLoading from "@/components/kokonutui/ai-text-loading";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { diatonicChords, PITCH_CLASSES, relativeKey } from "@/lib/key";
 import { formatTimestamp, parseTimestamp } from "@/lib/time";
@@ -122,7 +129,9 @@ export default function Page() {
           </dl>
           <Histogram values={result.histogram} tonic={result.tonic} />
           <Chords keyName={result.key} relative={relativeKey(result.tonic, result.scale)} />
-          <NoteList notes={result.notes} />
+          <div className="flex border-t pt-4">
+            <NoteList notes={result.notes} />
+          </div>
         </div>
       )}
     </main>
@@ -160,22 +169,29 @@ function mmss(seconds: number) {
 
 function NoteList({ notes }: { notes: NoteRow[] }) {
   return (
-    <details className="group border-t pt-4">
-      <summary className="cursor-pointer text-sm select-none">
-        Notes ({notes.length})
-      </summary>
-      <ul className="mt-3 max-h-64 overflow-y-auto text-sm">
-        {notes.map((n, i) => (
-          <li key={i} className="flex justify-between border-b py-1 last:border-0">
-            <span className="text-muted-foreground tabular-nums">{mmss(n.time)}</span>
-            <span className="font-medium">{n.name}</span>
-            <span className="text-muted-foreground tabular-nums">
-              {n.duration.toFixed(2)}s
-            </span>
-          </li>
-        ))}
-      </ul>
-    </details>
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="outline" size="sm" className="self-start">
+          Notes ({notes.length})
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="gap-0">
+        <SheetHeader>
+          <SheetTitle>Notes ({notes.length})</SheetTitle>
+        </SheetHeader>
+        <ul className="overflow-y-auto px-4 pb-4 text-sm">
+          {notes.map((n, i) => (
+            <li key={i} className="flex justify-between border-b py-1 last:border-0">
+              <span className="text-muted-foreground tabular-nums">{mmss(n.time)}</span>
+              <span className="font-medium">{n.name}</span>
+              <span className="text-muted-foreground tabular-nums">
+                {n.duration.toFixed(2)}s
+              </span>
+            </li>
+          ))}
+        </ul>
+      </SheetContent>
+    </Sheet>
   );
 }
 
