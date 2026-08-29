@@ -38,6 +38,7 @@
   ],
   "exclude": [
     "node_modules",
-    "lib/key.test.ts"
+    "lib/key.test.ts",
+    "lib/tempo.test.ts"
   ]
 }

@@ -13,6 +13,7 @@ const analysisSchema = new Schema(
     videoId: { type: String, required: true },
     title: String,
     bpm: Number,
+    meter: Number, // beats per bar, 3 or 4; see detectMeter for the caveats
     key: { type: String, required: true },
     tonic: { type: String, required: true },
     scale: { type: String, required: true, enum: ["major", "minor"] },

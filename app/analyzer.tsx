@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -100,7 +100,7 @@ export default function Analyzer({ history }: { history: RecentAnalysis[] }) {
               {result.noteCount} notes{result.cached && " · cached"}
             </span>
           </div>
-          <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-5">
+          <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
             <div>
               <dt className="text-muted-foreground">Tonic</dt>
               <dd className="text-lg">{result.tonic}</dd>
@@ -116,6 +116,18 @@ export default function Analyzer({ history }: { history: RecentAnalysis[] }) {
             <div>
               <dt className="text-muted-foreground">BPM</dt>
               <dd className="text-lg">{result.bpm ? bpmLabel(result.bpm) : "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">
+                Meter
+                <sup className="group relative">
+                  <Info className="ml-0.5 inline size-2.5" />
+                  <span className="bg-popover text-popover-foreground pointer-events-none absolute bottom-full left-1/2 z-10 hidden w-44 -translate-x-1/2 rounded-md border p-2 text-xs font-normal whitespace-normal shadow-md group-hover:block">
+                    A guess from where the accents fall (a hint, not a measurement).
+                  </span>
+                </sup>
+              </dt>
+              <dd className="text-lg">{result.meter ? `${result.meter}/4` : "—"}</dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Confidence</dt>
