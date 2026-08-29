@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,7 @@ import type { RecentAnalysis } from "@/lib/mongo";
 import { analyze, type NoteRow } from "./actions";
 
 const QUICK_LENGTHS = [10, 20, 30];
+const HISTORY_PAGE_SIZE = 3;
 
 export default function Analyzer({ history }: { history: RecentAnalysis[] }) {
   const [state, formAction, isPending] = useActionState(analyze, null);
@@ -170,16 +172,49 @@ function Chords({ keyName, relative }: { keyName: string; relative: string }) {
 /** Previously analysed clips. Clicking one refills the form and submits it; that
  *  is a cache hit, so the stored result comes straight back. */
 function History({ items, onPick }: { items: RecentAnalysis[]; onPick: (h: RecentAnalysis) => void }) {
+  const [page, setPage] = useState(0);
+  const pageCount = Math.ceil(items.length / HISTORY_PAGE_SIZE);
+  // The list shrinks as clips expire out of the cache, so the page can outrun it.
+  const current = Math.min(page, pageCount - 1);
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-sm font-medium">Recent</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-medium px-2">Recent</h2>
+        {pageCount > 1 && (
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Previous page"
+              disabled={current === 0}
+              onClick={() => setPage(current - 1)}
+            >
+              <ChevronLeft />
+            </Button>
+            <span className="text-muted-foreground text-sm tabular-nums">
+              {current + 1} / {pageCount}
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Next page"
+              disabled={current === pageCount - 1}
+              onClick={() => setPage(current + 1)}
+            >
+              <ChevronRight />
+            </Button>
+          </div>
+        )}
+      </div>
       <ul className="flex flex-col">
-        {items.map((h) => (
+        {items.slice(current * HISTORY_PAGE_SIZE, (current + 1) * HISTORY_PAGE_SIZE).map((h) => (
           <li key={h._id}>
             <button
               type="button"
               onClick={() => onPick(h)}
-              className="hover:text-emerald-500 flex w-full items-baseline gap-3 rounded-md text-left text-sm py-3 cursor-pointer"
+              className="hover:text-emerald-500 flex w-full items-baseline gap-3 rounded-md text-left text-sm p-2 cursor-pointer"
             >
               <span className="flex-1 truncate min-w-10">{h.title ?? h.videoId}</span>
               <span className="lg:w-30 text-muted-foreground shrink-0 tabular-nums text-center">

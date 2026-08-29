@@ -63,7 +63,7 @@ export type RecentAnalysis = {
 };
 
 /** Most recently analysed clips, for the history list on the page. */
-export async function recent(limit = 8): Promise<RecentAnalysis[]> {
+export async function recent(limit = 9): Promise<RecentAnalysis[]> {
   const col = await analyses();
   return col
     .find({}, { _id: 1, videoId: 1, title: 1, key: 1, bpm: 1, start: 1, end: 1 })
