@@ -34,7 +34,7 @@ export default function Analyzer({ history }: { history: RecentAnalysis[] }) {
   const result = state && !("error" in state) ? state : null;
 
   return (
-    <main className="mx-auto flex min-h-svh max-w-3xl flex-col justify-center gap-8 p-6">
+    <main className="mx-auto flex min-h-svh max-w-3xl flex-col justify-center gap-8 p-6 mt-3">
       <form ref={formRef} action={formAction} className="flex flex-col gap-4">
         <div className="grid gap-2">
           <Label htmlFor="url">YouTube URL</Label>
@@ -73,7 +73,7 @@ export default function Analyzer({ history }: { history: RecentAnalysis[] }) {
             <Input id="end" name="end" required value={end} onChange={(e) => setEnd(e.target.value)} />
           </div>
         </div>
-        <Button type="submit" disabled={isPending} className="w-full">
+        <Button type="submit" disabled={isPending} className="w-full h-8">
           {isPending ? "Analyzing…" : "Analyze"}
         </Button>
       </form>
@@ -113,7 +113,7 @@ export default function Analyzer({ history }: { history: RecentAnalysis[] }) {
             </div>
             <div>
               <dt className="text-muted-foreground">BPM</dt>
-              <dd className="text-lg">{result.bpm ?? "—"}</dd>
+              <dd className="text-lg">{result.bpm ? bpmLabel(result.bpm) : "—"}</dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Confidence</dt>
@@ -179,15 +179,14 @@ function History({ items, onPick }: { items: RecentAnalysis[]; onPick: (h: Recen
             <button
               type="button"
               onClick={() => onPick(h)}
-              className="hover:text-green-700 flex w-full items-baseline gap-3 rounded-md text-left text-sm py-3 cursor-pointer"
+              className="hover:text-emerald-500 flex w-full items-baseline gap-3 rounded-md text-left text-sm py-3 cursor-pointer"
             >
-              {/* min-w-0 is what lets truncate actually clip inside a flex row */}
-              <span className="min-w-0 flex-1 truncate">{h.title ?? h.videoId}</span>
-              <span className="w-30 text-muted-foreground shrink-0 tabular-nums text-right">
+              <span className="flex-1 truncate min-w-10">{h.title ?? h.videoId}</span>
+              <span className="lg:w-30 text-muted-foreground shrink-0 tabular-nums text-center">
                 {formatTimestamp(h.start)}–{formatTimestamp(h.end)}
               </span>
-              <span className="w-30 shrink-0 text-right">{h.key}</span>
-              <span className="text-muted-foreground w-30 shrink-0 text-right whitespace-nowrap tabular-nums">
+              <span className="lg:w-30 shrink-0 text-center">{h.key}</span>
+              <span className="text-muted-foreground lg:w-30 shrink-0 text-right whitespace-nowrap tabular-nums">
                 {h.bpm ? `${h.bpm} BPM` : "—"}
               </span>
             </button>
@@ -196,6 +195,13 @@ function History({ items, onPick }: { items: RecentAnalysis[]; onPick: (h: Recen
       </ul>
     </section>
   );
+}
+
+/** The detector cannot tell a pulse from its double, so show the other reading
+ *  too whenever it is also a plausible tempo. */
+function bpmLabel(bpm: number) {
+  const alt = Math.round((bpm > 120 ? bpm / 2 : bpm * 2) * 10) / 10;
+  return alt >= 60 && alt <= 200 ? `${bpm} or ${alt}` : String(bpm);
 }
 
 function mmss(seconds: number) {

@@ -7,6 +7,11 @@ const HOP_SIZE = 220; // music-tempo defaults to 441 @ 44100Hz; halve it for our
  * Beat tracking over the raw audio (not the transcribed notes — percussion
  * carries the pulse and basic-pitch does not transcribe it).
  * Returns null if no stable pulse was found.
+ *
+ * The detector's window spans 60–200 BPM, wider than an octave, so it can
+ * report either metrical level: a soft 83 BPM ballad often comes back as 166.
+ * That ambiguity is real (nothing in the audio says which level is "the"
+ * tempo), so it is surfaced in the UI rather than folded away here.
  */
 export function detectBpm(pcm: Float32Array): number | null {
   const { tempo } = new MusicTempo(pcm, {
