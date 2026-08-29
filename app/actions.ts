@@ -3,6 +3,7 @@
 import { Midi } from "@tonejs/midi";
 import { fetchClip, fetchTitle } from "@/lib/audio";
 import { transcribe } from "@/lib/basicPitch";
+import { detectBpm } from "@/lib/tempo";
 import { detectKey, type KeyResult } from "@/lib/key";
 import { analyses, type Analysis } from "@/lib/mongo";
 import { parseTimestamp } from "@/lib/time";
@@ -16,6 +17,7 @@ export type AnalyzeState =
   | (KeyResult & {
       videoId: string;
       title?: string;
+      bpm?: number | null;
       start: number;
       end: number;
       noteCount: number;
@@ -29,7 +31,7 @@ export type AnalyzeState =
  * unpacked into a note list rather than sent down as bytes.
  */
 function toState(a: Analysis, cached: boolean): AnalyzeState {
-  const { key, tonic, scale, confidence, histogram, videoId, title, start, end, noteCount } = a;
+  const { key, tonic, scale, confidence, histogram, videoId, title, bpm, start, end, noteCount } = a;
   // Mongo hands back a Binary unless promoteBuffers is on; both wrap a Buffer.
   const bytes = a.midi instanceof Uint8Array ? a.midi : (a.midi as { buffer: Buffer }).buffer;
   const notes = new Midi(bytes).tracks[0].notes.map(({ time, name, duration }) => ({
@@ -39,7 +41,7 @@ function toState(a: Analysis, cached: boolean): AnalyzeState {
   }));
   return {
     key, tonic, scale, confidence, histogram,
-    videoId, title, start, end, noteCount, notes, cached,
+    videoId, title, bpm, start, end, noteCount, notes, cached,
   };
 }
 
@@ -78,6 +80,7 @@ export async function analyze(
       fetchClip(url, start, end),
     ]);
     const notes = await transcribe(pcm);
+    const bpm = detectBpm(pcm);
     const result = detectKey(notes);
     if (!result) return { error: "No pitched notes found in that clip" };
 
@@ -99,6 +102,7 @@ export async function analyze(
       ...result,
       videoId: id,
       title,
+      bpm,
       start,
       end,
       noteCount: notes.length,
