@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { Midi } from "@tonejs/midi";
 import { fetchClip, fetchTitle } from "@/lib/audio";
 import { transcribe } from "@/lib/basicPitch";
@@ -111,6 +112,7 @@ export async function analyze(
       expiresAt: new Date(Date.now() + CACHE_TTL_MS),
     };
     const saved = await col.create(doc);
+    revalidatePath("/"); // so the new clip shows up in the history list
     return toState(saved.toObject(), false);
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Analysis failed" };
