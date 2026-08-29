@@ -1,0 +1,22 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      # The app pins the database name to `scallym`, so no path is needed here.
+      MONGODB_URI: mongodb://mongo:27017
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:8
+    volumes:
+      - mongo-data:/data/db
+    # Deliberately not published to the host: only `app` needs to reach it.
+    # Use `docker compose exec mongo mongosh scallym` to poke around.
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
