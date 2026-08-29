@@ -16,7 +16,7 @@ export type AnalyzeState =
   | { error: string }
   | (KeyResult & {
       videoId: string;
-      title?: string;
+      title?: string | null;
       bpm?: number | null;
       start: number;
       end: number;
@@ -70,7 +70,7 @@ export async function analyze(
 
   const _id = `${id}:${start}-${end}`;
   const col = await analyses();
-  const hit = await col.findOne({ _id });
+  const hit = await col.findOne({ _id }).lean<Analysis>();
   if (hit) return toState(hit, true);
 
   try {
@@ -97,7 +97,7 @@ export async function analyze(
       });
     }
 
-    const doc: Analysis = {
+    const doc: Omit<Analysis, "createdAt"> = {
       _id,
       ...result,
       videoId: id,
@@ -108,11 +108,10 @@ export async function analyze(
       noteCount: notes.length,
       url,
       midi: Buffer.from(midi.toArray()),
-      createdAt: new Date(),
       expiresAt: new Date(Date.now() + CACHE_TTL_MS),
     };
-    await col.insertOne(doc);
-    return toState(doc, false);
+    const saved = await col.create(doc);
+    return toState(saved.toObject(), false);
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Analysis failed" };
   }
