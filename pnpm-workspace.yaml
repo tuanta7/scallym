@@ -1,4 +1,8 @@
 allowBuilds:
-  core-js: set this to true or false
+  core-js: false
   sharp: false
   unrs-resolver: false
+
+# basic-pitch asks for tfjs ^3.2.0; force the one copy we install to v4
+overrides:
+  "@tensorflow/tfjs": "^4.22.0"
