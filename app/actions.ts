@@ -5,7 +5,7 @@ import { fetchClip, fetchTitle } from "@/lib/audio";
 import { transcribe } from "@/lib/basicPitch";
 import { detectBpm } from "@/lib/tempo";
 import { detectKey, type KeyResult } from "@/lib/key";
-import { analyses, type Analysis } from "@/lib/mongo";
+import { analyses, CACHE_TTL_MS, type Analysis } from "@/lib/mongo";
 import { parseTimestamp } from "@/lib/time";
 
 const MAX_CLIP_SECONDS = 30;
@@ -109,6 +109,7 @@ export async function analyze(
       url,
       midi: Buffer.from(midi.toArray()),
       createdAt: new Date(),
+      expiresAt: new Date(Date.now() + CACHE_TTL_MS),
     };
     await col.insertOne(doc);
     return toState(doc, false);
