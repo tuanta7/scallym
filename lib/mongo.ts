@@ -5,6 +5,7 @@ export type Analysis = KeyResult & {
   _id: string; // `${videoId}:${start}-${end}`
   videoId: string;
   title?: string;
+  bpm?: number | null;
   start: number;
   end: number;
   noteCount: number;

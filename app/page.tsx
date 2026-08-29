@@ -96,7 +96,7 @@ export default function Page() {
               {result.noteCount} notes{result.cached && " · cached"}
             </span>
           </div>
-          <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
+          <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-5">
             <div>
               <dt className="text-muted-foreground">Tonic</dt>
               <dd className="text-lg">{result.tonic}</dd>
@@ -108,6 +108,10 @@ export default function Page() {
             <div>
               <dt className="text-muted-foreground">Relative</dt>
               <dd className="text-lg">{relativeKey(result.tonic, result.scale)}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">BPM</dt>
+              <dd className="text-lg">{result.bpm ?? "—"}</dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Confidence</dt>
