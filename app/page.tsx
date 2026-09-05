@@ -1,12 +1,12 @@
 import { recent, type RecentAnalysis } from "@/lib/mongo";
-import Analyzer from "./analyzer";
+import Analyzer from "@/components/analyzer";
 
 export default async function Page() {
-  // A database outage should cost the history list, not the whole page.
   let history: RecentAnalysis[] = [];
   try {
     history = await recent();
   } catch {
+    // A database outage should only cost the history list.
     history = [];
   }
   return <Analyzer history={history} />;
